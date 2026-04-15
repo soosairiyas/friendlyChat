@@ -6,6 +6,7 @@ export const friendRequest = sequelize.define("friendRequests", {
     type: DataTypes.INTEGER,
     allowNull: false,
     autoIncrement: true,
+    primaryKey: true,
   },
   senderId: {
     type: DataTypes.INTEGER,
@@ -16,7 +17,7 @@ export const friendRequest = sequelize.define("friendRequests", {
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM("pending", "Accepted", "Rejected"),
+    type: DataTypes.ENUM("pending", "accepted", "rejected"),
     defaultValue: "pending",
   },
 });

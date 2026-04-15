@@ -7,6 +7,7 @@ dotenv.config();
 export const reqAuth = async function (req, res, next) {
   try {
     const userToken = req.cookies.userjwtToken;
+    console.log(">>>>>>>>userToken", userToken);
 
     if (!userToken) {
       return res.status(401).json({

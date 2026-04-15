@@ -7,12 +7,12 @@ export const Friend = sequelize.define("Friends", {
     autoIncrement: true,
     primaryKey: true,
   },
-  userId: {
+  requestId: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  friendId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+  state: {
+    type: DataTypes.STRING,
+    defaultValue: "active",
   },
 });
