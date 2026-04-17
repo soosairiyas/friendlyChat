@@ -12,7 +12,7 @@ export const Friend = sequelize.define("Friends", {
     allowNull: false,
   },
   state: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM("active", "inactive"),
     defaultValue: "active",
   },
 });

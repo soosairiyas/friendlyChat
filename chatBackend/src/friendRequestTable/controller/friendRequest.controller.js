@@ -3,6 +3,9 @@ import {
   friendRequestAcceptService,
   rejectFriendRequestService,
   getAllFriendService,
+  getFriendsService,
+  removeFriendService,
+  getFriendRequestService,
 } from "../service/friendRequest.service.js";
 
 export const getAllFriendController = async function (req, res) {
@@ -24,7 +27,8 @@ export const createFriendRequestController = async function (req, res) {
   try {
     const senderId = req.user.id;
 
-    const { receiverId } = req.body;
+    const receiverId = Number(req.params.id);
+    console.log(">>>>>>>>>>>>>ReceiverId", receiverId);
 
     const createFriendRequest = await createFriendRequestService({
       senderId,
@@ -41,10 +45,25 @@ export const createFriendRequestController = async function (req, res) {
   }
 };
 
+export const getFriendRequestController = async function (req, res) {
+  try {
+    const userId = req.user.id;
+    const requests = await getFriendRequestService(userId);
+    return res.status(requests.statuscode).json({
+      message: requests.message,
+      data: requests.data,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
 export const friendRequestAcceptController = async function (req, res) {
   try {
     const receiverId = req.user.id;
-    const { requestId } = req.body;
+    const requestId = Number(req.params.id);
     const requestAccept = await friendRequestAcceptService(
       requestId,
       receiverId,
@@ -62,7 +81,7 @@ export const friendRequestAcceptController = async function (req, res) {
 export const friendRequestRejectController = async function (req, res) {
   try {
     const receiverId = req.user.id;
-    const { requestId } = req.body;
+    const requestId = req.params.id;
 
     const requestReject = await rejectFriendRequestService(
       requestId,
@@ -74,6 +93,37 @@ export const friendRequestRejectController = async function (req, res) {
     });
   } catch (error) {
     return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const getFriendsController = async function (req, res) {
+  try {
+    const userId = req.user.id;
+
+    const result = await getFriendsService(userId);
+
+    return res.status(result.statuscode).json({
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+
+export const removeFriendController = async function (req, res) {
+  try {
+    const requestId = Number(req.params.id);
+    const removRequest = await removeFriendService(requestId);
+    return res.status(removRequest.statuscode).json({
+      message: removRequest.message,
+    });
+  } catch (error) {
+    return res.status(500).json({
       message: error.message,
     });
   }

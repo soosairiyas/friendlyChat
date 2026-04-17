@@ -11,7 +11,7 @@ export const reqAuth = async function (req, res, next) {
 
     if (!userToken) {
       return res.status(401).json({
-        message: "Unauthorized ❌ No token provided",
+        message: "Unauthorized No token provided!",
       });
     }
     const decoded = jwt.verify(userToken, process.env.CHAT_USER_JWT_SECRET);
