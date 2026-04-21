@@ -49,6 +49,21 @@ export const sendMessageService = async function ({
   return chat;
 };
 
+export const validChatAccess = async ({ chatId, userId }) => {
+  const chat = await friendRequest.findOne({
+    where: {
+      id: chatId,
+      status: "accepted",
+      [Op.or]: [{ senderId: userId }, { receiverId: userId }],
+    },
+  });
+
+  if (!chat) {
+    throw new Error("Chat Not allowed");
+  }
+  return chat;
+};
+
 export const getMessagesService = async (userId, otherUserId) => {
   console.log("userId:", userId);
   console.log("otherUserId", otherUserId);

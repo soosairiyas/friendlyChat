@@ -1,10 +1,15 @@
 import { app } from "./app.js";
-import { sendMessageService } from "./src/chats/service/chat.service.js";
+import {
+  sendMessageService,
+  validChatAccess,
+} from "./src/chats/service/chat.service.js";
 import { dbConnect } from "./src/config/db.js";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
+import { friendRequest } from "./src/friendRequestTable/model/friendRequest.model.js";
+import { Op } from "sequelize";
 
 const PORT = process.env.PORT || 4000;
 console.log(">>>>>PORT", PORT);
@@ -49,16 +54,23 @@ io.use((socket, next) => {
 // ✅ CONNECTION HANDLER
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id, "UserId:", socket.userId);
-  socket.on("joinRoom", (chatId) => {
-    const roomName = `user_${chatId}`;
-    console.log("Socket ID:", socket.id);
-    console.log("User ID:", socket.userId);
-    console.log("Joined room:", roomName);
-    socket.join(roomName);
-    console.log("Rooms of socket:", socket.rooms);
+
+  socket.on("joinRoom", async (chatId) => {
+    try {
+      const userId = socket.userId;
+      if (!userId) {
+        return socket.emit("errorMessage", "Unauthorized");
+      }
+      console.log("userId", userId);
+      await validChatAccess({ chatId, userId });
+      const roomName = `user_${chatId}`;
+      socket.join(roomName);
+    } catch (err) {
+      console.error(err);
+      socket.emit("errorMessage", "Error Joining Room");
+    }
   });
 
-  // sending Message to the User
   socket.on("sendMessage", async ({ receiverId, message, chatId }) => {
     try {
       const senderId = socket.userId;
@@ -69,13 +81,14 @@ io.on("connection", (socket) => {
         message,
       });
       io.to(`user_${chatId}`).emit("receiveMessage", savedMessage);
-      console.log("chatId", chatId);
+
       socket.emit("receiveMessage", savedMessage);
     } catch (error) {
       socket.emit("errorMessage", error.message);
     }
   });
 
+  // ✅ DISCONNECT (ALSO INSIDE)
   socket.on("disconnect", () => {
     console.log("User Disconnected:", socket.id);
   });
